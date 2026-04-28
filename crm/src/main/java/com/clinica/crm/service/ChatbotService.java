@@ -114,7 +114,7 @@ public class ChatbotService {
             lead.setCliente(cliente);
             lead.setDataCriacao(LocalDateTime.now());
             lead.setInteresse(tipo);
-            lead.setStatus("ABERTO"); // 🔥 AJUSTADO
+            lead.setStatus("ABERTO"); //  AJUSTADO
 
             // opcional: manter sempre aberto enquanto conversa
             lead.setStatus("ABERTO");
@@ -226,10 +226,10 @@ public class ChatbotService {
 
             ResponseEntity<String> response = rest.postForEntity(url, request, String.class);
 
-            System.out.println("✅ RESPOSTA Z-API: " + response.getBody());
+            System.out.println(" RESPOSTA Z-API: " + response.getBody());
 
         } catch (Exception e) {
-            System.err.println("❌ ERRO AO ENVIAR MENSAGEM: " + e.getMessage());
+            System.err.println(" ERRO AO ENVIAR MENSAGEM: " + e.getMessage());
             e.printStackTrace();
         }
     }

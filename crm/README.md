@@ -29,6 +29,7 @@ mvn spring-boot:run
 ngrok http 8080
 3. Configurar webhook:
 https://SEU-NGROK/webhook/whatsapp
+4. Habilitar o Z-API - https://app.z-api.io/
 
 ## Fluxo
 

@@ -2,7 +2,7 @@ package com.clinica.crm.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
 @Table(name = "clinica") // nome da tabela no banco de dados
@@ -15,7 +15,8 @@ public class Clinica {
 
     private String nome;
     private String email;
-    @JsonIgnore // Evita expor a senha no json, o que é um risco de segurança.
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY) // para não expor a senha na resposta JSON
     private String senha;
     private String cnpj;
+    private String telefone;
 }

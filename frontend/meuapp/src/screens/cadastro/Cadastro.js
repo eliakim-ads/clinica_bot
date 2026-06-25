@@ -1,18 +1,8 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  SafeAreaView,
-  ScrollView
-} from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import api from '../services/api';
+import api from '../../services/api';
 
 export default function Cadastro({ navigation }) {
 
@@ -22,58 +12,71 @@ export default function Cadastro({ navigation }) {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [confirmarSenha, setConfirmarSenha] = useState('');
+  const [carregando, setCarregando] = useState(false);
 
   const handleCadastro = async () => {
+    const dadosCadastro = {
+      nome: nomeClinica.trim(),
+      cnpj: cnpj.trim(),
+      telefone: telefone.trim(),
+      email: email.trim().toLowerCase(),
+      senha
+    };
 
     if (
-      !nomeClinica ||
-      !cnpj ||
-      !telefone ||
-      !email ||
-      !senha ||
+      !dadosCadastro.nome ||
+      !dadosCadastro.cnpj ||
+      !dadosCadastro.telefone ||
+      !dadosCadastro.email ||
+      !dadosCadastro.senha ||
       !confirmarSenha
     ) {
       Alert.alert(
-        'Campos obrigatórios',
+        'Campos obrigatorios',
         'Preencha todos os campos.'
       );
       return;
     }
 
-    if (senha !== confirmarSenha) {
+    if (dadosCadastro.senha !== confirmarSenha) {
       Alert.alert(
         'Erro',
-        'As senhas não conferem.'
+        'As senhas nao conferem.'
       );
       return;
     }
 
     try {
+      setCarregando(true);
 
-      await api.post('/clinicas', {
-        nome: nomeClinica,
-        cnpj,
-        telefone,
-        email,
-        senha
-      });
+      await api.post('/clinicas', dadosCadastro);
 
       Alert.alert(
         'Sucesso',
-        'Cadastro realizado com sucesso!'
+        'Cadastro realizado com sucesso!',
+        [
+          {
+            text: 'OK',
+            onPress: () => navigation.navigate('Login')
+          }
+        ]
       );
-
-      navigation.navigate('Login');
 
     } catch (error) {
 
       console.log(error);
 
+      const mensagem =
+        error.response?.data?.mensagem ||
+        'Nao foi possivel realizar o cadastro.';
+
       Alert.alert(
         'Erro',
-        'Não foi possível realizar o cadastro.'
+        mensagem
       );
 
+    } finally {
+      setCarregando(false);
     }
   };
 
@@ -90,7 +93,7 @@ export default function Cadastro({ navigation }) {
           <View style={styles.header}>
 
             <View style={styles.logoContainer}>
-              <Text style={styles.logoEmoji}>🦷</Text>
+              <Text style={styles.logoEmoji}>{'\u{1F9B7}'}</Text>
             </View>
 
             <Text style={styles.titulo}>
@@ -98,7 +101,7 @@ export default function Cadastro({ navigation }) {
             </Text>
 
             <Text style={styles.subtitulo}>
-              Cadastre sua clínica no Bucal UP
+              Cadastre sua clinica no Bucal UP
             </Text>
 
           </View>
@@ -106,11 +109,11 @@ export default function Cadastro({ navigation }) {
           <View style={styles.form}>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Nome da Clínica</Text>
+              <Text style={styles.label}>Nome da Clinica</Text>
 
               <TextInput
                 style={styles.input}
-                placeholder="Clínica Sorriso Feliz"
+                placeholder="Clinica Sorriso Feliz"
                 value={nomeClinica}
                 onChangeText={setNomeClinica}
               />
@@ -157,7 +160,7 @@ export default function Cadastro({ navigation }) {
 
               <TextInput
                 style={styles.input}
-                placeholder="••••••••"
+                placeholder="********"
                 secureTextEntry
                 value={senha}
                 onChangeText={setSenha}
@@ -169,7 +172,7 @@ export default function Cadastro({ navigation }) {
 
               <TextInput
                 style={styles.input}
-                placeholder="••••••••"
+                placeholder="********"
                 secureTextEntry
                 value={confirmarSenha}
                 onChangeText={setConfirmarSenha}
@@ -177,12 +180,13 @@ export default function Cadastro({ navigation }) {
             </View>
 
             <TouchableOpacity
-              style={styles.botao}
+              style={[styles.botao, carregando && styles.botaoDesabilitado]}
               activeOpacity={0.8}
+              disabled={carregando}
               onPress={handleCadastro}
             >
               <Text style={styles.textoBotao}>
-                Criar Conta
+                {carregando ? 'Cadastrando...' : 'Criar Conta'}
               </Text>
             </TouchableOpacity>
 
@@ -191,7 +195,7 @@ export default function Cadastro({ navigation }) {
               onPress={() => navigation.navigate('Login')}
             >
               <Text style={styles.textoLogin}>
-                Já possui conta?
+                Ja possui conta?
                 <Text style={styles.textoLoginHighlight}>
                   {' '}Entrar
                 </Text>
@@ -285,6 +289,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 8
+  },
+
+  botaoDesabilitado: {
+    opacity: 0.7
   },
 
   textoBotao: {

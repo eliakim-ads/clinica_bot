@@ -1,38 +1,38 @@
 import React from 'react';
-import {  View,  Text,  TouchableOpacity,  ScrollView,  StatusBar,  StyleSheet
-} from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, StatusBar, StyleSheet } from 'react-native';
 
-export default function Dashboard({ navigation }) {
+export default function Dashboard({ navigation, clinica }) {
+  const nomeClinica = clinica?.nome || 'Clinica';
 
   const servicos = [
     {
       id: 1,
       titulo: 'Clientes',
-      icone: '👥',
+      icone: '\u{1F465}',
       tela: 'Clientes'
     },
     {
       id: 2,
       titulo: 'Leads',
-      icone: '📈',
+      icone: '\u{1F4C8}',
       tela: 'Leads'
     },
     {
       id: 3,
       titulo: 'Agenda',
-      icone: '📅',
+      icone: '\u{1F4C5}',
       tela: 'Agenda'
     },
     {
       id: 4,
       titulo: 'Chatbot',
-      icone: '🤖',
+      icone: '\u{1F916}',
       tela: 'Chatbot'
     },
     {
       id: 5,
-      titulo: 'Configurações',
-      icone: '⚙️',
+      titulo: 'Configuracoes',
+      icone: '\u2699\uFE0F',
       tela: 'Configuracoes'
     }
   ];
@@ -45,25 +45,22 @@ export default function Dashboard({ navigation }) {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-
-        {/* HEADER */}
         <View style={styles.header}>
-          <View>
-            <Text style={styles.saudacao}>
-              Clínica Logo
+          <View style={styles.headerText}>
+            <Text style={styles.saudacao} numberOfLines={1}>
+              {nomeClinica}
             </Text>
 
             <Text style={styles.subsaudacao}>
-              CRM Inteligente para Clínicas
+              CRM Inteligente para Clinicas
             </Text>
           </View>
 
           <View style={styles.avatarContainer}>
-            <Text style={styles.avatar}>🦷</Text>
+            <Text style={styles.avatar}>{'\u{1F9B7}'}</Text>
           </View>
         </View>
 
-        {/* CARD PRINCIPAL */}
         <TouchableOpacity
           style={styles.cardDestaque}
           activeOpacity={0.8}
@@ -79,19 +76,14 @@ export default function Dashboard({ navigation }) {
             </Text>
           </View>
 
-          <Text style={styles.emojiDestaque}>
-            📈
-          </Text>
-
+          <Text style={styles.emojiDestaque}>{'\u{1F4C8}'}</Text>
         </TouchableOpacity>
 
-        {/* INDICADORES */}
         <Text style={styles.tituloSecao}>
           Resumo do Dia
         </Text>
 
         <View style={styles.cardsResumo}>
-
           <View style={styles.cardResumo}>
             <Text style={styles.numeroResumo}>25</Text>
             <Text style={styles.textoResumo}>Clientes</Text>
@@ -101,11 +93,9 @@ export default function Dashboard({ navigation }) {
             <Text style={styles.numeroResumo}>8</Text>
             <Text style={styles.textoResumo}>Leads</Text>
           </View>
-
         </View>
 
         <View style={styles.cardsResumo}>
-
           <View style={styles.cardResumo}>
             <Text style={styles.numeroResumo}>5</Text>
             <Text style={styles.textoResumo}>Agenda Hoje</Text>
@@ -115,25 +105,20 @@ export default function Dashboard({ navigation }) {
             <Text style={styles.numeroResumo}>3</Text>
             <Text style={styles.textoResumo}>Chatbot</Text>
           </View>
-
         </View>
 
-        {/* SERVIÇOS */}
         <Text style={styles.tituloSecao}>
-          Módulos
+          Modulos
         </Text>
 
         <View style={styles.grid}>
-
           {servicos.map((item) => (
-
             <TouchableOpacity
               key={item.id}
               style={styles.itemGrid}
               activeOpacity={0.8}
               onPress={() => navigation.navigate(item.tela)}
             >
-
               <Text style={styles.emojiGrid}>
                 {item.icone}
               </Text>
@@ -141,28 +126,22 @@ export default function Dashboard({ navigation }) {
               <Text style={styles.tituloGrid}>
                 {item.titulo}
               </Text>
-
             </TouchableOpacity>
-
           ))}
-
         </View>
-
       </ScrollView>
 
-      {/* MENU INFERIOR */}
       <View style={styles.tabBar}>
-
         <TouchableOpacity style={styles.tabItem}>
-          <Text style={styles.tabIconActive}>🏠</Text>
-          <Text style={styles.tabTextActive}>Início</Text>
+          <Text style={styles.tabIconActive}>{'\u{1F3E0}'}</Text>
+          <Text style={styles.tabTextActive}>Inicio</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.tabItem}
           onPress={() => navigation.navigate('Clientes')}
         >
-          <Text style={styles.tabIcon}>👥</Text>
+          <Text style={styles.tabIcon}>{'\u{1F465}'}</Text>
           <Text style={styles.tabText}>Clientes</Text>
         </TouchableOpacity>
 
@@ -170,7 +149,7 @@ export default function Dashboard({ navigation }) {
           style={styles.tabItem}
           onPress={() => navigation.navigate('Leads')}
         >
-          <Text style={styles.tabIcon}>📈</Text>
+          <Text style={styles.tabIcon}>{'\u{1F4C8}'}</Text>
           <Text style={styles.tabText}>Leads</Text>
         </TouchableOpacity>
 
@@ -178,18 +157,15 @@ export default function Dashboard({ navigation }) {
           style={styles.tabItem}
           onPress={() => navigation.navigate('Configuracoes')}
         >
-          <Text style={styles.tabIcon}>⚙️</Text>
+          <Text style={styles.tabIcon}>{'\u2699\uFE0F'}</Text>
           <Text style={styles.tabText}>Config.</Text>
         </TouchableOpacity>
-
       </View>
-
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-
   container: {
     flex: 1,
     backgroundColor: '#F8FAF8'
@@ -204,7 +180,13 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 30
+  },
+
+  headerText: {
+    flex: 1,
+    paddingRight: 16
   },
 
   saudacao: {
@@ -344,5 +326,4 @@ const styles = StyleSheet.create({
   tabText: {
     color: '#666'
   }
-
 });

@@ -1,51 +1,41 @@
 import React, { useState } from 'react';
-import {  View,  Text,  StyleSheet,  TextInput,  TouchableOpacity,  Alert,  KeyboardAvoidingView,  Platform,  SafeAreaView} from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import api from '../services/api';
+import api from '../../services/api';
+import { saveSession } from '../../services/authStorage';
 
-export default function Login({ navigation }) {
-
+export default function Login({ navigation, onLoginSuccess }) {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [lembrar, setLembrar] = useState(false);
+  const [carregando, setCarregando] = useState(false);
 
   const handleLogin = async () => {
-
     if (!email || !senha) {
-      Alert.alert(
-        'Campos obrigatórios',
-        'Preencha e-mail e senha.'
-      );
+      Alert.alert('Campos obrigatorios', 'Preencha e-mail e senha.');
       return;
     }
-    // LOGIN TEMPORÁRIO
-    navigation.navigate('Dashboard');
 
-    /*try {
+    try {
+      setCarregando(true);
 
       const response = await api.post('/auth/login', {
         email,
         senha
       });
 
-      console.log(response.data);
+      if (lembrar) {
+        await saveSession(response.data);
+      }
 
-      Alert.alert(
-        'Sucesso',
-        'Login realizado com sucesso!'
-      );
-
-      navigation.navigate('Dashboard');
-
+      onLoginSuccess(response.data);
     } catch (error) {
-
       console.log(error);
-
-      Alert.alert(
-        'Erro',
-        'Usuário ou senha inválidos.'
-      );
-    } */
+      Alert.alert('Erro', 'Usuario ou senha invalidos.');
+    } finally {
+      setCarregando(false);
+    }
   };
 
   return (
@@ -54,31 +44,21 @@ export default function Login({ navigation }) {
         style={styles.content}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-
-        {/* Header */}
         <View style={styles.header}>
-
           <View style={styles.logoContainer}>
-            <Text style={styles.logoEmoji}>🦷</Text>
+            <Text style={styles.logoEmoji}>{'\u{1F9B7}'}</Text>
           </View>
 
-          <Text style={styles.titulo}>
-            Clinica
-          </Text>
+          <Text style={styles.titulo}>Clinica</Text>
 
           <Text style={styles.subtitulo}>
             Seu sorriso em dia, sempre.
           </Text>
-
         </View>
 
-        {/* Formulário */}
         <View style={styles.form}>
-
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>
-              E-mail
-            </Text>
+            <Text style={styles.label}>E-mail</Text>
 
             <TextInput
               style={styles.input}
@@ -91,15 +71,12 @@ export default function Login({ navigation }) {
             />
           </View>
 
-
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>
-              Senha
-            </Text>
+            <Text style={styles.label}>Senha</Text>
 
             <TextInput
               style={styles.input}
-              placeholder="••••••••"
+              placeholder="********"
               placeholderTextColor="#999"
               secureTextEntry
               value={senha}
@@ -107,14 +84,11 @@ export default function Login({ navigation }) {
             />
           </View>
 
-
           <View style={styles.rowActions}>
-
             <TouchableOpacity
               style={styles.checkboxContainer}
               onPress={() => setLembrar(!lembrar)}
             >
-
               <View
                 style={[
                   styles.customCheckbox,
@@ -129,58 +103,47 @@ export default function Login({ navigation }) {
               <Text style={styles.checkboxText}>
                 Lembrar de mim
               </Text>
-
             </TouchableOpacity>
 
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate('RecuperacaoSenha')}>
               <Text style={styles.linkEsqueceu}>
                 Esqueceu a senha?
               </Text>
             </TouchableOpacity>
-
           </View>
 
-
           <TouchableOpacity
-            style={styles.botao}
+            style={[styles.botao, carregando && styles.botaoDesabilitado]}
             activeOpacity={0.8}
+            disabled={carregando}
             onPress={handleLogin}
           >
-
             <Text style={styles.textoBotao}>
-              Entrar
+              {carregando ? 'Entrando...' : 'Entrar'}
             </Text>
-
           </TouchableOpacity>
-
 
           <TouchableOpacity
             style={styles.btnCadastro}
             onPress={() => navigation.navigate('Cadastro')}
           >
-
             <Text style={styles.textoCadastro}>
-              Não possui conta?
+              Nao possui conta?
               <Text style={styles.textoCadastroHighlight}>
                 {' '}Cadastre-se
               </Text>
             </Text>
-
           </TouchableOpacity>
-
         </View>
-
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
 
-
 const styles = StyleSheet.create({
-
   container: {
     flex: 1,
-    backgroundColor: '#F8FAF8'
+    backgroundColor: '#052301'
   },
 
   content: {
@@ -212,11 +175,11 @@ const styles = StyleSheet.create({
   titulo: {
     fontSize: 30,
     fontWeight: 'bold',
-    color: '#2E7D32'
+    color: '#FFF'
   },
 
   subtitulo: {
-    color: '#666',
+    color: '#E0E0E0',
     marginTop: 5
   },
 
@@ -231,7 +194,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#444',
+    color: '#FFF',
     marginBottom: 8
   },
 
@@ -280,7 +243,7 @@ const styles = StyleSheet.create({
   },
 
   checkboxText: {
-    color: '#666',
+    color: '#E0E0E0',
     fontSize: 13
   },
 
@@ -299,6 +262,10 @@ const styles = StyleSheet.create({
     elevation: 8
   },
 
+  botaoDesabilitado: {
+    opacity: 0.7
+  },
+
   textoBotao: {
     color: '#FFF',
     fontSize: 18,
@@ -311,12 +278,11 @@ const styles = StyleSheet.create({
   },
 
   textoCadastro: {
-    color: '#666'
+    color: '#E0E0E0'
   },
 
   textoCadastroHighlight: {
     color: '#2E7D32',
     fontWeight: 'bold'
   }
-
 });

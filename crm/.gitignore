@@ -11,6 +11,8 @@ src/main/resources/application-*.properties
 !src/main/resources/application-example.properties
 .mvn/
 .resources/
+.expo
+.mvn/wrapper/
 
 
 ### STS ###

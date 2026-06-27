@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 import api from '../../services/api';
 import { saveSession } from '../../services/authStorage';
@@ -8,6 +9,7 @@ import { saveSession } from '../../services/authStorage';
 export default function Login({ navigation, onLoginSuccess }) {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
+  const [mostrarSenha, setMostrarSenha] = useState(false);
   const [lembrar, setLembrar] = useState(false);
   const [carregando, setCarregando] = useState(false);
 
@@ -25,9 +27,7 @@ export default function Login({ navigation, onLoginSuccess }) {
         senha
       });
 
-      if (lembrar) {
-        await saveSession(response.data);
-      }
+      await saveSession(response.data, lembrar);
 
       onLoginSuccess(response.data);
     } catch (error) {
@@ -74,14 +74,29 @@ export default function Login({ navigation, onLoginSuccess }) {
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Senha</Text>
 
-            <TextInput
-              style={styles.input}
-              placeholder="********"
-              placeholderTextColor="#999"
-              secureTextEntry
-              value={senha}
-              onChangeText={setSenha}
-            />
+            <View style={styles.passwordContainer}>
+              <TextInput
+                style={[styles.input, styles.passwordInput]}
+                placeholder="********"
+                placeholderTextColor="#999"
+                secureTextEntry={!mostrarSenha}
+                value={senha}
+                onChangeText={setSenha}
+              />
+
+              <TouchableOpacity
+                style={styles.passwordToggle}
+                onPress={() => setMostrarSenha(valorAtual => !valorAtual)}
+                accessibilityRole="button"
+                accessibilityLabel={mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'}
+              >
+                <MaterialCommunityIcons
+                  name={mostrarSenha ? 'eye-off-outline' : 'eye-outline'}
+                  size={24}
+                  color="#666"
+                />
+              </TouchableOpacity>
+            </View>
           </View>
 
           <View style={styles.rowActions}>
@@ -206,6 +221,24 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E0E0E0',
     fontSize: 16
+  },
+
+  passwordContainer: {
+    position: 'relative'
+  },
+
+  passwordInput: {
+    paddingRight: 56
+  },
+
+  passwordToggle: {
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    width: 52,
+    height: 55,
+    alignItems: 'center',
+    justifyContent: 'center'
   },
 
   rowActions: {

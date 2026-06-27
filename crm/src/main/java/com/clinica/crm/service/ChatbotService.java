@@ -15,6 +15,7 @@ import com.clinica.crm.repository.MensagemAutomaticaRepository;
 import com.clinica.crm.repository.ClinicaRepository;
 import com.clinica.crm.entity.Clinica;
 import com.clinica.crm.entity.Mensagem;
+import com.clinica.crm.entity.MensagemAutomatica;
 import com.clinica.crm.repository.MensagemRepository;
 import org.springframework.web.client.RestTemplate;
 import java.util.HashMap;
@@ -161,11 +162,14 @@ public class ChatbotService {
         msgCliente.setLead(lead);
         mensagemRepository.save(msgCliente);
 
-        // Busca resposta automática no banco
-        String resposta = mensagemAutomaticaRepository
-                .findByTipo(tipo)
-                .map(m -> m.getConteudo())
-                .orElse("Não entendi, pode reformular?");
+        // Busca a resposta automatica da mesma clinica do lead.
+        Long idClinica = lead.getCliente().getClinica().getIdClinica();
+        MensagemAutomatica mensagemAutomatica = mensagemAutomaticaRepository
+                .findByTipoAndAtivoTrueAndClinica_IdClinica(tipo, idClinica);
+
+        String resposta = mensagemAutomatica != null
+                ? mensagemAutomatica.getConteudo()
+                : "Não entendi, pode reformular?";
 
         // Salva resposta do bot
         Mensagem msgBot = new Mensagem();
@@ -181,7 +185,7 @@ public class ChatbotService {
 
         return response;
     }
-
+    
     @Value("${zapi.instance-id:${ZAPI_INSTANCE_ID}:}")
     private String zapiInstanceId;
 

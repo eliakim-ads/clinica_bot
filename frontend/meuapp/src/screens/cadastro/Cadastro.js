@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 import api from '../../services/api';
 
@@ -12,6 +13,8 @@ export default function Cadastro({ navigation }) {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [confirmarSenha, setConfirmarSenha] = useState('');
+  const [mostrarSenha, setMostrarSenha] = useState(false);
+  const [mostrarConfirmarSenha, setMostrarConfirmarSenha] = useState(false);
   const [carregando, setCarregando] = useState(false);
 
   const handleCadastro = async () => {
@@ -158,25 +161,59 @@ export default function Cadastro({ navigation }) {
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Senha</Text>
 
-              <TextInput
-                style={styles.input}
-                placeholder="********"
-                secureTextEntry
-                value={senha}
-                onChangeText={setSenha}
-              />
+              <View style={styles.passwordContainer}>
+                <TextInput
+                  style={[styles.input, styles.passwordInput]}
+                  placeholder="********"
+                  secureTextEntry={!mostrarSenha}
+                  value={senha}
+                  onChangeText={setSenha}
+                />
+
+                <TouchableOpacity
+                  style={styles.passwordToggle}
+                  onPress={() => setMostrarSenha(valorAtual => !valorAtual)}
+                  accessibilityRole="button"
+                  accessibilityLabel={mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'}
+                >
+                  <MaterialCommunityIcons
+                    name={mostrarSenha ? 'eye-off-outline' : 'eye-outline'}
+                    size={24}
+                    color="#666"
+                  />
+                </TouchableOpacity>
+              </View>
             </View>
 
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Confirmar Senha</Text>
 
-              <TextInput
-                style={styles.input}
-                placeholder="********"
-                secureTextEntry
-                value={confirmarSenha}
-                onChangeText={setConfirmarSenha}
-              />
+              <View style={styles.passwordContainer}>
+                <TextInput
+                  style={[styles.input, styles.passwordInput]}
+                  placeholder="********"
+                  secureTextEntry={!mostrarConfirmarSenha}
+                  value={confirmarSenha}
+                  onChangeText={setConfirmarSenha}
+                />
+
+                <TouchableOpacity
+                  style={styles.passwordToggle}
+                  onPress={() => setMostrarConfirmarSenha(valorAtual => !valorAtual)}
+                  accessibilityRole="button"
+                  accessibilityLabel={
+                    mostrarConfirmarSenha
+                      ? 'Ocultar confirmação de senha'
+                      : 'Mostrar confirmação de senha'
+                  }
+                >
+                  <MaterialCommunityIcons
+                    name={mostrarConfirmarSenha ? 'eye-off-outline' : 'eye-outline'}
+                    size={24}
+                    color="#666"
+                  />
+                </TouchableOpacity>
+              </View>
             </View>
 
             <TouchableOpacity
@@ -279,6 +316,24 @@ const styles = StyleSheet.create({
     borderColor: '#E0E0E0',
     paddingHorizontal: 20,
     fontSize: 16
+  },
+
+  passwordContainer: {
+    position: 'relative'
+  },
+
+  passwordInput: {
+    paddingRight: 56
+  },
+
+  passwordToggle: {
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    width: 52,
+    height: 55,
+    alignItems: 'center',
+    justifyContent: 'center'
   },
 
   botao: {

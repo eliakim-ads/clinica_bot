@@ -5,11 +5,13 @@ public class LoginResponse {
     private Long idClinica;
     private String nome;
     private String email;
+    private String token;
 
-    public LoginResponse(Long idClinica, String nome, String email) {
+    public LoginResponse(Long idClinica, String nome, String email, String token) {
         this.idClinica = idClinica;
         this.nome = nome;
         this.email = email;
+        this.token = token;
     }
 
     public Long getIdClinica() {
@@ -34,5 +36,13 @@ public class LoginResponse {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 }

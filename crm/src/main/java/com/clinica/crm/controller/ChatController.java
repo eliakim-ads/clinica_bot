@@ -3,6 +3,7 @@ package com.clinica.crm.controller;
 import java.time.LocalDateTime;
 
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
 
 import com.clinica.crm.entity.CadastroLead;
 import com.clinica.crm.entity.Mensagem;
@@ -13,6 +14,9 @@ import com.clinica.crm.repository.MensagemRepository;
 import com.clinica.crm.dto.ChatRequest;
 import com.clinica.crm.dto.ChatResponse;
 import com.clinica.crm.service.ChatbotService;
+import com.clinica.crm.service.ClinicaContextService;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/chat") // DEFINE A URL PARA ESTE CONTROLADOR
@@ -22,30 +26,39 @@ public class ChatController {
         private final CadastroLeadRepository leadRepository;
         private final MensagemAutomaticaRepository autoRepository;
         private final ChatbotService chatbotService; // Service para detectar tipo de mensagem
+        private final ClinicaContextService clinicaContextService;
 
         public ChatController(
                         MensagemRepository mensagemRepository,
                         CadastroLeadRepository leadRepository,
                         MensagemAutomaticaRepository autoRepository,
-                        ChatbotService chatbotService) {
+                        ChatbotService chatbotService,
+                        ClinicaContextService clinicaContextService) {
 
                 this.mensagemRepository = mensagemRepository;
                 this.leadRepository = leadRepository;
                 this.autoRepository = autoRepository;
                 this.chatbotService = chatbotService; // Injeção do service
+                this.clinicaContextService = clinicaContextService;
         }
 
         @PostMapping
-        public ChatResponse chat(@RequestBody ChatRequest request) {
+        public ResponseEntity<ChatResponse> chat(
+                        @RequestBody ChatRequest request,
+                        HttpServletRequest servletRequest) {
 
                 // validar entrada
                 if (request.getMensagem() == null || request.getMensagem().isBlank()) {
                         throw new RuntimeException("Mensagem não pode ser vazia");
                 }
 
-                // buscar lead
+                Long idClinica = clinicaContextService.getIdClinicaAutenticada(servletRequest);
+
+                // buscar lead da clinica autenticada
                 CadastroLead lead = leadRepository
-                                .findById(request.getIdLead())
+                                .findByIdCadastroLeadAndCliente_Clinica_IdClinica(
+                                                request.getIdLead(),
+                                                idClinica)
                                 .orElseThrow(() -> new RuntimeException("Lead não encontrado"));
 
                 // detectar tipo (AGORA VIA SERVICE)
@@ -53,7 +66,7 @@ public class ChatController {
 
                 // buscar resposta automática
                 MensagemAutomatica auto = autoRepository.findByTipoAndAtivoTrueAndClinica_IdClinica(tipo,
-                                request.getIdClinica());
+                                idClinica);
 
                 String resposta;
 
@@ -102,15 +115,19 @@ public class ChatController {
                 response.setNomeClinica(nomeClinica);
                 response.setTipo(tipo);
 
-                return response;
+                return ResponseEntity.ok(response);
         }
 
         @GetMapping("/inicio")
-        public Mensagem iniciarChat(@RequestParam Long idLead,
-                        @RequestParam Long idClinica) {
+        public ResponseEntity<Mensagem> iniciarChat(
+                        @RequestParam Long idLead,
+                        @RequestParam(name = "idClinica", required = false) Long idClinicaIgnorada,
+                        HttpServletRequest servletRequest) {
+
+                Long idClinica = clinicaContextService.getIdClinicaAutenticada(servletRequest);
 
                 CadastroLead lead = leadRepository
-                                .findById(idLead)
+                                .findByIdCadastroLeadAndCliente_Clinica_IdClinica(idLead, idClinica)
                                 .orElseThrow(() -> new RuntimeException("Lead não encontrado"));
 
                 MensagemAutomatica auto = autoRepository
@@ -125,7 +142,7 @@ public class ChatController {
                 msgBot.setDataEnvio(LocalDateTime.now());
                 msgBot.setLead(lead);
 
-                return mensagemRepository.save(msgBot);
+                return ResponseEntity.ok(mensagemRepository.save(msgBot));
         }  
 
 }

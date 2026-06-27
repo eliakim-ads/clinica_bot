@@ -11,58 +11,74 @@ import {
 
 import api from '../../services/api';
 
-export default function ClienteForm({ navigation }) {
+export default function ClienteForm({ navigation, route }) {
+    const cliente = route.params?.cliente;
+    const editando = Boolean(cliente?.idCliente);
 
-    const [nome, setNome] = useState('');
-    const [telefone, setTelefone] = useState('');
+    const [nome, setNome] = useState(cliente?.nome || '');
+    const [telefone, setTelefone] = useState(cliente?.telefone || '');
+    const [carregando, setCarregando] = useState(false);
 
     async function salvarCliente() {
+        const dadosCliente = {
+            nome: nome.trim(),
+            telefone: telefone.trim()
+        };
 
-        if (!nome || !telefone) {
+        if (!dadosCliente.nome || !dadosCliente.telefone) {
             Alert.alert(
-                'Campos obrigatórios',
+                'Campos obrigatorios',
                 'Preencha nome e telefone.'
             );
             return;
         }
 
         try {
+            setCarregando(true);
 
-            await api.post('/clientes', {
-                nome,
-                telefone
-            });
+            if (editando) {
+                await api.put(`/clientes/${cliente.idCliente}`, dadosCliente);
+            } else {
+                await api.post('/clientes', dadosCliente);
+            }
 
             Alert.alert(
                 'Sucesso',
-                'Cliente cadastrado com sucesso!'
+                editando
+                    ? 'Cliente atualizado com sucesso!'
+                    : 'Cliente cadastrado com sucesso!',
+                [
+                    {
+                        text: 'OK',
+                        onPress: () => navigation.goBack()
+                    }
+                ]
             );
-
-            navigation.goBack();
-
         } catch (error) {
-
             console.log(error);
+
+            const mensagem =
+                error.response?.data?.mensagem ||
+                (editando
+                    ? 'Nao foi possivel atualizar o cliente.'
+                    : 'Nao foi possivel cadastrar o cliente.');
 
             Alert.alert(
                 'Erro',
-                'Não foi possível cadastrar o cliente.'
+                mensagem
             );
-
+        } finally {
+            setCarregando(false);
         }
-
     }
 
     return (
-
         <ScrollView style={styles.container}>
-
             <Text style={styles.titulo}>
-                Novo Cliente
+                {editando ? 'Editar Cliente' : 'Novo Cliente'}
             </Text>
 
             <View style={styles.card}>
-
                 <Text style={styles.label}>
                     Nome
                 </Text>
@@ -87,24 +103,20 @@ export default function ClienteForm({ navigation }) {
                 />
 
                 <TouchableOpacity
-                    style={styles.botao}
+                    style={[styles.botao, carregando && styles.botaoDesabilitado]}
+                    disabled={carregando}
                     onPress={salvarCliente}
                 >
                     <Text style={styles.textoBotao}>
-                        Salvar Cliente
+                        {carregando ? 'Salvando...' : editando ? 'Atualizar Cliente' : 'Salvar Cliente'}
                     </Text>
                 </TouchableOpacity>
-
             </View>
-
         </ScrollView>
-
     );
-
 }
 
 const styles = StyleSheet.create({
-
     container: {
         flex: 1,
         backgroundColor: '#F8FAF8',
@@ -152,10 +164,13 @@ const styles = StyleSheet.create({
         marginTop: 30
     },
 
+    botaoDesabilitado: {
+        opacity: 0.7
+    },
+
     textoBotao: {
         color: '#FFF',
         fontSize: 16,
         fontWeight: 'bold'
     }
-
 });

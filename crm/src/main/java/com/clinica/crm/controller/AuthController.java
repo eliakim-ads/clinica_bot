@@ -13,15 +13,18 @@ import com.clinica.crm.dto.LoginRequest;
 import com.clinica.crm.dto.LoginResponse;
 import com.clinica.crm.entity.Clinica;
 import com.clinica.crm.repository.ClinicaRepository;
+import com.clinica.crm.service.JwtService;
 
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
 
     private final ClinicaRepository clinicaRepository;
+    private final JwtService jwtService;
 
-    public AuthController(ClinicaRepository clinicaRepository) {
+    public AuthController(ClinicaRepository clinicaRepository, JwtService jwtService) {
         this.clinicaRepository = clinicaRepository;
+        this.jwtService = jwtService;
     }
 
     @PostMapping("/login")
@@ -44,10 +47,13 @@ public class AuthController {
                     .body(Map.of("mensagem", "Usuario ou senha invalidos."));
         }
 
+        String token = jwtService.gerarToken(clinica.getIdClinica(), clinica.getEmail());
+
         LoginResponse response = new LoginResponse(
                 clinica.getIdClinica(),
                 clinica.getNome(),
-                clinica.getEmail());
+                clinica.getEmail(),
+                token);
 
         return ResponseEntity.ok(response);
     }
